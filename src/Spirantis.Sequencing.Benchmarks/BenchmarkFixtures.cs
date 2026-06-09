@@ -23,7 +23,11 @@ internal sealed class BenchStep(string name, FunctionResultType type = FunctionR
 {
     public string GetFunctionName() => name;
 
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, BenchData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        BenchData data,
+        CancellationToken cancellationToken
+    )
     {
         data.Counter++;
         return type switch
@@ -39,7 +43,11 @@ internal sealed class BenchStep(string name, FunctionResultType type = FunctionR
 /// <summary>Parameterless step (returns True), registered via the generic <c>&lt;T&gt;</c> overloads.</summary>
 internal sealed class BenchStepClass : ISequenceFunction<DefaultSequenceContext, BenchData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, BenchData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        BenchData data,
+        CancellationToken cancellationToken
+    )
     {
         data.Counter++;
         return FunctionResult.True();
@@ -49,7 +57,11 @@ internal sealed class BenchStepClass : ISequenceFunction<DefaultSequenceContext,
 /// <summary>Method-group style step.</summary>
 internal static class BenchFunctions
 {
-    public static ValueTask<FunctionResult> Step(DefaultSequenceContext context, BenchData data)
+    public static ValueTask<FunctionResult> Step(
+        DefaultSequenceContext context,
+        BenchData data,
+        CancellationToken cancellationToken
+    )
     {
         data.Counter++;
         return FunctionResult.True();
@@ -171,11 +183,12 @@ internal static class BenchSequences
     /// <summary>Linear chain built via a single (non-capturing) lambda.</summary>
     public static ISequenceFunction<DefaultSequenceContext, BenchData> LinearViaLambda(int depth)
     {
-        Func<DefaultSequenceContext, BenchData, ValueTask<FunctionResult>> step = (context, data) =>
-        {
-            data.Counter++;
-            return FunctionResult.True();
-        };
+        Func<DefaultSequenceContext, BenchData, CancellationToken, ValueTask<FunctionResult>> step =
+            (context, data, cancellationToken) =>
+            {
+                data.Counter++;
+                return FunctionResult.True();
+            };
 
         var def = SequenceBuilder.Create<DefaultSequenceContext, BenchData>().Run(step, "n0");
 

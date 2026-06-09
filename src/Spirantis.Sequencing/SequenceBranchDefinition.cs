@@ -53,14 +53,19 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// </summary>
     /// <param name="function">The function to add.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> After(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function
+        Func<TSequenceContext, TSequenceData, CancellationToken, ValueTask<FunctionResult>> function
     ) => builder.Register(function);
 
     /// <summary>Adds a function to the sequence under a name derived from the method and <paramref name="functionName"/>.</summary>
     /// <param name="function">The function to add.</param>
     /// <param name="functionName">An optional suffix appended to the method name to disambiguate the node.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> After(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? functionName
     )
     {
@@ -105,7 +110,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <param name="function">The reaction function.</param>
     /// <param name="functionName">An optional suffix appended to the method name to disambiguate the node.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfTrueRun(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? functionName = null
     )
     {
@@ -156,7 +166,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <param name="function">The reaction function.</param>
     /// <param name="functionName">An optional suffix appended to the method name to disambiguate the node.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfFalseRun(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? functionName = null
     )
     {
@@ -207,7 +222,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <param name="function">The reaction function.</param>
     /// <param name="functionName">An optional suffix appended to the method name to disambiguate the node.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfAbortRun(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? functionName = null
     )
     {
@@ -264,7 +284,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <param name="functionName">An optional name override; defaults to the method name.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfValueRun(
         Func<object?, bool> predicate,
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? functionName = null
     )
     {
@@ -316,7 +341,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <param name="function">The reaction function.</param>
     /// <param name="functionName">An optional name override; defaults to the method name.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfValueElseRun(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? functionName = null
     ) => IfValueRun(_ => true, function, functionName);
 
@@ -327,7 +357,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <summary>Runs <paramref name="function"/> on any result type when no specific branch matched.</summary>
     /// <param name="function">The reaction function.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfAnyRun(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function
+        Func<TSequenceContext, TSequenceData, CancellationToken, ValueTask<FunctionResult>> function
     )
     {
         builder.Register(function);
@@ -339,7 +369,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     /// <param name="function">The reaction function.</param>
     /// <param name="functionName">A suffix appended to the method name to disambiguate the node.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> IfAnyRun(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string functionName
     )
     {

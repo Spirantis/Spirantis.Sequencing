@@ -88,7 +88,7 @@ public class RegistrationTests
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
             .Run(
-                (context, data) =>
+                (context, data, cancellationToken) =>
                 {
                     data.ExecutionLog.Add("start");
                     return FunctionResult.True();
@@ -96,7 +96,7 @@ public class RegistrationTests
                 "start"
             )
             .IfTrueRun(
-                (context, data) =>
+                (context, data, cancellationToken) =>
                 {
                     data.ExecutionLog.Add("reaction");
                     return FunctionResult.False();

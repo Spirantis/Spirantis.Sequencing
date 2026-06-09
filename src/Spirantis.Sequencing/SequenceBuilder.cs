@@ -33,7 +33,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
     > branchDefinitions = [];
     private readonly Dictionary<
         string,
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>>
+        Func<TSequenceContext, TSequenceData, CancellationToken, ValueTask<FunctionResult>>
     > functions = [];
 
     private readonly string? sequenceName;
@@ -67,14 +67,19 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
     /// <summary>Registers the initial function from a delegate, named after its method.</summary>
     /// <param name="function">The function to start the sequence with.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> Run(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function
+        Func<TSequenceContext, TSequenceData, CancellationToken, ValueTask<FunctionResult>> function
     ) => Register(function);
 
     /// <summary>Registers the initial function from a delegate under an explicit name.</summary>
     /// <param name="function">The function to start the sequence with.</param>
     /// <param name="functionName">The name to register the function under.</param>
     public SequenceBranchDefinition<TSequenceContext, TSequenceData> Run(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string functionName
     ) => Register(function, functionName);
 
@@ -101,7 +106,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
     }
 
     internal SequenceBranchDefinition<TSequenceContext, TSequenceData> Register(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function
+        Func<TSequenceContext, TSequenceData, CancellationToken, ValueTask<FunctionResult>> function
     )
     {
         ArgumentNullException.ThrowIfNull(function);
@@ -110,7 +115,12 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
     }
 
     internal SequenceBranchDefinition<TSequenceContext, TSequenceData> Register(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string functionName
     )
     {
@@ -156,7 +166,12 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
 
     private SequenceBranch<TSequenceContext, TSequenceData> BuildBranch(
         string functionName,
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         List<string> path,
         Dictionary<string, SequenceBranch<TSequenceContext, TSequenceData>> built,
         string? branchName = null

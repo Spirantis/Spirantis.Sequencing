@@ -7,11 +7,21 @@ internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
     where TSequenceContext : ISequenceContext
     where TSequenceData : ISequenceData
 {
-    private readonly Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function;
+    private readonly Func<
+        TSequenceContext,
+        TSequenceData,
+        CancellationToken,
+        ValueTask<FunctionResult>
+    > function;
     private readonly string branchName;
 
     public SequenceBranch(
-        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        Func<
+            TSequenceContext,
+            TSequenceData,
+            CancellationToken,
+            ValueTask<FunctionResult>
+        > function,
         string? branchName = null
     )
     {
@@ -32,7 +42,8 @@ internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
 
     public async ValueTask<FunctionResult> Invoke(
         TSequenceContext sequenceContext,
-        TSequenceData sequenceData
+        TSequenceData sequenceData,
+        CancellationToken cancellationToken = default
     )
     {
         // Each node has at most one continuation, so the sequence is a tail-walk: run it as a loop
@@ -41,7 +52,10 @@ internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
         var current = this;
         while (true)
         {
-            var pending = current.function.Invoke(sequenceContext, sequenceData);
+            // Stop promptly between steps even if a function doesn't observe the token itself.
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var pending = current.function.Invoke(sequenceContext, sequenceData, cancellationToken);
             var result = pending.IsCompletedSuccessfully ? pending.Result : await pending;
 
             var next = current.SelectContinuation(result);

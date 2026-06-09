@@ -7,6 +7,9 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- xUnit1051: these are fast unit tests; threading TestContext.Current.CancellationToken
+         through every Invoke call adds noise without value. Cancellation is tested explicitly. -->
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

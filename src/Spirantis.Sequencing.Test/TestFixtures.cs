@@ -36,7 +36,8 @@ internal static class Delegates
 {
     public static ValueTask<FunctionResult> TrueDelegate(
         DefaultSequenceContext context,
-        TestSequenceData data
+        TestSequenceData data,
+        CancellationToken cancellationToken
     )
     {
         data.ExecutionLog.Add(nameof(TrueDelegate));
@@ -45,7 +46,8 @@ internal static class Delegates
 
     public static ValueTask<FunctionResult> FalseDelegate(
         DefaultSequenceContext context,
-        TestSequenceData data
+        TestSequenceData data,
+        CancellationToken cancellationToken
     )
     {
         data.ExecutionLog.Add(nameof(FalseDelegate));
@@ -57,7 +59,11 @@ internal static class Delegates
 
 internal sealed class ReturnsTrue : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(ReturnsTrue));
         return FunctionResult.True();
@@ -66,7 +72,11 @@ internal sealed class ReturnsTrue : ISequenceFunction<DefaultSequenceContext, Te
 
 internal sealed class ReturnsFalse : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(ReturnsFalse));
         return FunctionResult.False();
@@ -75,7 +85,11 @@ internal sealed class ReturnsFalse : ISequenceFunction<DefaultSequenceContext, T
 
 internal sealed class ReturnsAbort : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(ReturnsAbort));
         return FunctionResult.Abort();
@@ -85,7 +99,11 @@ internal sealed class ReturnsAbort : ISequenceFunction<DefaultSequenceContext, T
 /// <summary>Branches on <see cref="TestSequenceData.TakeTrue"/>: returns True or False accordingly.</summary>
 internal sealed class Gate : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(Gate));
         return data.TakeTrue ? FunctionResult.True() : FunctionResult.False();
@@ -95,7 +113,11 @@ internal sealed class Gate : ISequenceFunction<DefaultSequenceContext, TestSeque
 internal sealed class ReturnsTrueWithValue
     : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(ReturnsTrueWithValue));
         return FunctionResult.True(new TestPayload("ok"));
@@ -105,7 +127,11 @@ internal sealed class ReturnsTrueWithValue
 internal sealed class ReturnsIndeterminateAdmin
     : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(ReturnsIndeterminateAdmin));
         return FunctionResult.Indeterminate(new TestPayload("admin"));
@@ -115,7 +141,11 @@ internal sealed class ReturnsIndeterminateAdmin
 internal sealed class ReturnsIndeterminateGuest
     : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(ReturnsIndeterminateGuest));
         return FunctionResult.Indeterminate(new TestPayload("guest"));
@@ -126,7 +156,8 @@ internal sealed class AsyncReturnsTrue : ISequenceFunction<DefaultSequenceContex
 {
     public async ValueTask<FunctionResult> Invoke(
         DefaultSequenceContext context,
-        TestSequenceData data
+        TestSequenceData data,
+        CancellationToken cancellationToken
     )
     {
         await Task.Delay(1);
@@ -139,7 +170,11 @@ internal sealed class AsyncReturnsTrue : ISequenceFunction<DefaultSequenceContex
 
 internal sealed class StepA : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(StepA));
         return FunctionResult.True();
@@ -148,7 +183,11 @@ internal sealed class StepA : ISequenceFunction<DefaultSequenceContext, TestSequ
 
 internal sealed class StepB : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(StepB));
         return FunctionResult.True();
@@ -157,7 +196,11 @@ internal sealed class StepB : ISequenceFunction<DefaultSequenceContext, TestSequ
 
 internal sealed class StepC : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(StepC));
         return FunctionResult.True();
@@ -166,7 +209,11 @@ internal sealed class StepC : ISequenceFunction<DefaultSequenceContext, TestSequ
 
 internal sealed class StepD : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(nameof(StepD));
         return FunctionResult.True();
@@ -182,10 +229,30 @@ internal sealed class NamedStep(string name, FunctionResult result)
 {
     public string GetFunctionName() => name;
 
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
     {
         data.ExecutionLog.Add(name);
         return result;
+    }
+}
+
+/// <summary>Logs, then cancels the supplied token source — used to test mid-sequence cancellation.</summary>
+internal sealed class CancelStep(CancellationTokenSource source)
+    : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
+{
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
+    {
+        data.ExecutionLog.Add(nameof(CancelStep));
+        source.Cancel();
+        return FunctionResult.True();
     }
 }
 
@@ -245,7 +312,11 @@ internal sealed class PipelineData : IParseStage, IComputeStage, IFormatStage, I
 /// <summary>Sees RawInput + Parsed (A+B) only: reads the input, writes the parsed value.</summary>
 internal sealed class ParseInput : ISequenceFunction<DefaultSequenceContext, IParseStage>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, IParseStage data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        IParseStage data,
+        CancellationToken cancellationToken
+    )
     {
         data.Parsed = int.Parse(data.RawInput, CultureInfo.InvariantCulture);
         return FunctionResult.True();
@@ -255,7 +326,11 @@ internal sealed class ParseInput : ISequenceFunction<DefaultSequenceContext, IPa
 /// <summary>Sees Parsed + Computed (B+C) only: reads the parsed value, writes the computed value.</summary>
 internal sealed class ComputeValue : ISequenceFunction<DefaultSequenceContext, IComputeStage>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, IComputeStage data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        IComputeStage data,
+        CancellationToken cancellationToken
+    )
     {
         data.Computed = data.Parsed * 2;
         return FunctionResult.True();
@@ -265,7 +340,11 @@ internal sealed class ComputeValue : ISequenceFunction<DefaultSequenceContext, I
 /// <summary>Sees Computed + Output (C+D) only: reads the computed value, writes the output.</summary>
 internal sealed class FormatOutput : ISequenceFunction<DefaultSequenceContext, IFormatStage>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, IFormatStage data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        IFormatStage data,
+        CancellationToken cancellationToken
+    )
     {
         data.Output = $"result={data.Computed}";
         return FunctionResult.True();
@@ -275,8 +354,11 @@ internal sealed class FormatOutput : ISequenceFunction<DefaultSequenceContext, I
 /// <summary>Sees Parsed (B) only: a single-slice gate that aborts the sequence on a negative value.</summary>
 internal sealed class RejectNegative : ISequenceFunction<DefaultSequenceContext, IValidateStage>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, IValidateStage data) =>
-        data.Parsed >= 0 ? FunctionResult.True() : FunctionResult.Abort();
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext context,
+        IValidateStage data,
+        CancellationToken cancellationToken
+    ) => data.Parsed >= 0 ? FunctionResult.True() : FunctionResult.Abort();
 }
 
 /// <summary>

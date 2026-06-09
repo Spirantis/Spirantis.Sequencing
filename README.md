@@ -51,13 +51,15 @@ public sealed class OrderData : ISequenceData
 // 2. Functions. Each returns a FunctionResult that drives branching.
 public sealed class ValidateOrder : ISequenceFunction<DefaultSequenceContext, OrderData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext ctx, OrderData data) =>
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext ctx, OrderData data, CancellationToken ct = default) =>
         data.Amount > 0 ? FunctionResult.True() : FunctionResult.False();
 }
 
 public sealed class ChargeCard : ISequenceFunction<DefaultSequenceContext, OrderData>
 {
-    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext ctx, OrderData data)
+    public ValueTask<FunctionResult> Invoke(
+        DefaultSequenceContext ctx, OrderData data, CancellationToken ct = default)
     {
         data.Charged = true;
         return FunctionResult.True();
@@ -76,10 +78,18 @@ var sequence = SequenceBuilder
 
 var result = await sequence.Invoke(
     new DefaultSequenceContext(NullLogger.Instance),
-    new OrderData { Amount = 42m });
+    new OrderData { Amount = 42m },
+    cancellationToken);
 ```
 
 A built sequence is immutable and reusable across invocations (pass fresh data each time).
+
+### Cancellation
+
+`Invoke` takes a `CancellationToken`. The engine checks it **between steps** (throwing
+`OperationCanceledException` before each function runs), so a sequence stops promptly even if an
+individual function doesn't observe the token — and each function receives it to honor in its own
+async work. The token is optional (`default` = `CancellationToken.None`).
 
 ### What a sequence function can be
 

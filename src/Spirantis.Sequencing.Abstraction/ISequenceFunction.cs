@@ -18,6 +18,13 @@ public interface ISequenceFunction<in TSequenceContext, in TSequenceData>
     /// <summary>Executes the function.</summary>
     /// <param name="sequenceContext">The ambient context.</param>
     /// <param name="sequenceData">The data being processed.</param>
+    /// <param name="cancellationToken">
+    /// Signals cancellation. The engine also checks it between steps; honor it in any async work.
+    /// </param>
     /// <returns>The result that drives branch selection.</returns>
-    ValueTask<FunctionResult> Invoke(TSequenceContext sequenceContext, TSequenceData sequenceData);
+    ValueTask<FunctionResult> Invoke(
+        TSequenceContext sequenceContext,
+        TSequenceData sequenceData,
+        CancellationToken cancellationToken = default
+    );
 }
