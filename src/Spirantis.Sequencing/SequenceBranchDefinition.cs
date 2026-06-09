@@ -11,7 +11,6 @@ namespace Spirantis.Sequencing;
 /// <typeparam name="TSequenceData">The per-invocation data type flowing through the sequence.</typeparam>
 public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     where TSequenceContext : ISequenceContext
-    where TSequenceData : ISequenceData
 {
     private readonly SequenceBuilder<TSequenceContext, TSequenceData> builder;
 

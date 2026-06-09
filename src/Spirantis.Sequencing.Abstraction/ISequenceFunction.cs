@@ -8,7 +8,6 @@ namespace Spirantis.Sequencing.Abstraction;
 /// <typeparam name="TSequenceData">The per-invocation data type flowing through the sequence.</typeparam>
 public interface ISequenceFunction<in TSequenceContext, in TSequenceData>
     where TSequenceContext : ISequenceContext
-    where TSequenceData : ISequenceData
 {
     /// <summary>
     /// The name used to identify this function within a sequence; defaults to the runtime type name.

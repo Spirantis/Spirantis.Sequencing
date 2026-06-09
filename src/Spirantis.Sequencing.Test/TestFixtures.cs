@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Spirantis.Sequencing.Abstraction;
 
@@ -9,11 +9,8 @@ namespace Spirantis.Sequencing.Test;
 /// Sequence data that records, in order, the name each function logs as it runs. Because the same
 /// instance flows through the whole sequence, <see cref="ExecutionLog"/> is the exact execution path.
 /// </summary>
-internal sealed class TestSequenceData : ISequenceData
+internal sealed class TestSequenceData
 {
-    public string CorrelationKey { get; set; } = Guid.NewGuid().ToString();
-    public Stopwatch Stopwatch { get; set; } = Stopwatch.StartNew();
-
     public List<string> ExecutionLog { get; } = [];
 
     /// <summary>Lets a <see cref="Gate"/> pick its True/False branch from the data.</summary>
@@ -289,20 +286,17 @@ internal interface IHasOutput
 }
 
 // Composite views: each is the slice one function works with (the "AB" / "BC" / "CD" of the ask).
-internal interface IParseStage : ISequenceData, IHasRawInput, IHasParsed;
+internal interface IParseStage : IHasRawInput, IHasParsed;
 
-internal interface IComputeStage : ISequenceData, IHasParsed, IHasComputed;
+internal interface IComputeStage : IHasParsed, IHasComputed;
 
-internal interface IFormatStage : ISequenceData, IHasComputed, IHasOutput;
+internal interface IFormatStage : IHasComputed, IHasOutput;
 
-internal interface IValidateStage : ISequenceData, IHasParsed;
+internal interface IValidateStage : IHasParsed;
 
 /// <summary>The concrete data: implements every stage view, so it can flow through all of them.</summary>
 internal sealed class PipelineData : IParseStage, IComputeStage, IFormatStage, IValidateStage
 {
-    public string CorrelationKey { get; set; } = Guid.NewGuid().ToString();
-    public Stopwatch Stopwatch { get; set; } = Stopwatch.StartNew();
-
     public string RawInput { get; init; } = "";
     public int Parsed { get; set; }
     public int Computed { get; set; }
@@ -367,9 +361,51 @@ internal sealed class RejectNegative : ISequenceFunction<DefaultSequenceContext,
 /// </summary>
 internal sealed class MiniData : IComputeStage
 {
-    public string CorrelationKey { get; set; } = Guid.NewGuid().ToString();
-    public Stopwatch Stopwatch { get; set; } = Stopwatch.StartNew();
-
     public int Parsed { get; set; }
     public int Computed { get; set; }
+}
+
+// --- Contravariant context ------------------------------------------------------------------
+// ISequenceContext is also contravariant (`in TSequenceContext`). A richer context can add extra
+// ambient services (the classic example: an HttpClient), and a function targeting the base context
+// is reusable in a sequence whose context is the richer one.
+
+/// <summary>A richer context that adds a fake API client (stands in for an HttpClient).</summary>
+internal interface IApiContext : ISequenceContext
+{
+    List<string> ApiCalls { get; }
+}
+
+internal sealed class ApiContext(ILogger logger) : DefaultSequenceContext(logger), IApiContext
+{
+    public List<string> ApiCalls { get; } = [];
+}
+
+/// <summary>Targets the base <see cref="ISequenceContext"/>: reusable in any richer-context sequence.</summary>
+internal sealed class LogStep : ISequenceFunction<ISequenceContext, TestSequenceData>
+{
+    public ValueTask<FunctionResult> Invoke(
+        ISequenceContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
+    {
+        data.ExecutionLog.Add(nameof(LogStep));
+        return FunctionResult.True();
+    }
+}
+
+/// <summary>Targets the richer <see cref="IApiContext"/>: uses the service only that context provides.</summary>
+internal sealed class CallApiStep : ISequenceFunction<IApiContext, TestSequenceData>
+{
+    public ValueTask<FunctionResult> Invoke(
+        IApiContext context,
+        TestSequenceData data,
+        CancellationToken cancellationToken
+    )
+    {
+        data.ExecutionLog.Add(nameof(CallApiStep));
+        context.ApiCalls.Add("GET /thing");
+        return FunctionResult.True();
+    }
 }

@@ -13,8 +13,7 @@ public static class SequenceBuilder
         TSequenceContext,
         TSequenceData
     >(string? sequenceName = null)
-        where TSequenceContext : ISequenceContext
-        where TSequenceData : ISequenceData => new(sequenceName);
+        where TSequenceContext : ISequenceContext => new(sequenceName);
 }
 
 /// <summary>
@@ -25,7 +24,6 @@ public static class SequenceBuilder
 /// <typeparam name="TSequenceData">The per-invocation data type flowing through the sequence.</typeparam>
 public class SequenceBuilder<TSequenceContext, TSequenceData>
     where TSequenceContext : ISequenceContext
-    where TSequenceData : ISequenceData
 {
     private readonly Dictionary<
         string,

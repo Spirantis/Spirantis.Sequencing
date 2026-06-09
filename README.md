@@ -5,7 +5,7 @@ functions. Each function returns a typed result, and the result decides which fu
 so a sequence is a branching tree of steps rather than a fixed pipeline.
 
 - **`Spirantis.Sequencing.Abstraction`** — the contracts: `ISequenceFunction`, `FunctionResult`,
-  `ISequenceContext`, `ISequenceData`. Depends on [`Spirantis.Result`](https://www.nuget.org/packages/Spirantis.Result).
+  and `ISequenceContext`. Depends on [`Spirantis.Result`](https://www.nuget.org/packages/Spirantis.Result).
 - **`Spirantis.Sequencing`** — the fluent `SequenceBuilder` and the execution engine.
 
 Targets **.NET 10**.
@@ -17,8 +17,8 @@ Targets **.NET 10**.
 | `ISequenceFunction<TContext, TData>` | A unit of work. Returns a `FunctionResult`. Both type parameters are **contravariant** (`in`). |
 | `FunctionResult` | The outcome of a function — a `Result<object>` tagged with a `FunctionResultType`. Created via `FunctionResult.True()/False()/Abort()/Indeterminate(value)`. |
 | `FunctionResultType` | `True`, `False`, `Indeterminate`, `Abort` — selects the next branch. |
-| `ISequenceContext` | Ambient context shared across a run (exposes a logger). `DefaultSequenceContext` is provided. |
-| `ISequenceData` | The per-run payload that flows through every function (carries `CorrelationKey` + `Stopwatch`). |
+| `ISequenceContext` | Ambient, run-scoped environment shared by every function: `Logger`, `CorrelationKey`, `Stopwatch`, plus any services a richer context adds. `DefaultSequenceContext` is provided. |
+| *(data)* | The per-run payload handed step to step — **any type you like** (record, DTO, or a set of slice interfaces). No base type or interface required. |
 | `SequenceBuilder` | Fluent builder that wires functions and their reactions, then `Build()`s an executable sequence. |
 
 ### How a result routes
@@ -39,11 +39,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Spirantis.Sequencing;
 using Spirantis.Sequencing.Abstraction;
 
-// 1. Your per-run data.
-public sealed class OrderData : ISequenceData
+// 1. Your per-run data — any type; no base class or interface required.
+public sealed class OrderData
 {
-    public string CorrelationKey { get; set; } = Guid.NewGuid().ToString();
-    public Stopwatch Stopwatch { get; set; } = Stopwatch.StartNew();
     public decimal Amount { get; set; }
     public bool Charged { get; set; }
 }
@@ -161,22 +159,34 @@ name (and to the delegate's method name for method groups / lambdas).
     .IfAnyRun<HandleEveryoneElse>()                     // fallback when no predicate matched
 ```
 
-### Contravariant data slices
+### Contravariance: narrow views of context and data
 
-Because `ISequenceFunction` is contravariant in its data type, a function can target a narrow
-*view* of the data and still be dropped into a sequence whose concrete data is richer — every
-function in a run receives the same instance, so they share exactly the pieces they declare:
+`ISequenceFunction<in TSequenceContext, in TSequenceData>` is contravariant in **both** type
+parameters, so a function can target a narrow *view* and still be dropped into a sequence whose
+concrete type is richer. Every function in a run receives the same context and data instances.
+
+**Data slices** — a function declares only the pieces it touches; the concrete payload implements
+them all (functions share the overlapping pieces and stay independently reusable):
 
 ```csharp
-interface IParseStage   : ISequenceData, IHasRawInput, IHasParsed { }
-interface IComputeStage : ISequenceData, IHasParsed, IHasComputed { }
+interface IParseStage   : IHasRawInput, IHasParsed { }
+interface IComputeStage : IHasParsed, IHasComputed { }
 sealed class PipelineData : IParseStage, IComputeStage { /* ... */ }
 
 // ParseInput : ISequenceFunction<.., IParseStage> and ComputeValue : ISequenceFunction<.., IComputeStage>
 // both run in a SequenceBuilder.Create<.., PipelineData>() sequence and share `Parsed`.
 ```
 
-This keeps functions independent and reusable across different sequences and data types.
+**Richer context** — the same idea applies to the context. A function targeting the base
+`ISequenceContext` is reusable in a sequence whose context adds services (e.g. an HTTP client):
+
+```csharp
+interface IApiContext : ISequenceContext { HttpClient Http { get; } }
+
+// LogStep : ISequenceFunction<ISequenceContext, T>  (only needs ambient services)
+// CallApi : ISequenceFunction<IApiContext, T>       (uses the HTTP client)
+// both run in a SequenceBuilder.Create<IApiContext, T>() sequence; LogStep is reused as-is.
+```
 
 ## Repository layout
 

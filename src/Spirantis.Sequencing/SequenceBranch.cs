@@ -5,7 +5,6 @@ namespace Spirantis.Sequencing;
 internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
     : ISequenceFunction<TSequenceContext, TSequenceData>
     where TSequenceContext : ISequenceContext
-    where TSequenceData : ISequenceData
 {
     private readonly Func<
         TSequenceContext,

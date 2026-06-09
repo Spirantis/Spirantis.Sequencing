@@ -1,13 +1,10 @@
-using System.Diagnostics;
 using Spirantis.Sequencing.Abstraction;
 
 namespace Spirantis.Sequencing.Benchmarks;
 
 /// <summary>Minimal sequence data: a shared counter the steps bump so the work isn't elided.</summary>
-public sealed class BenchData : ISequenceData
+public sealed class BenchData
 {
-    public string CorrelationKey { get; set; } = "bench";
-    public Stopwatch Stopwatch { get; set; } = new();
     public int Counter { get; set; }
 }
 
