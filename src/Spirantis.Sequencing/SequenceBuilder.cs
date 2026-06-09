@@ -14,6 +14,10 @@ public static class SequenceBuilder
         TSequenceData
     >(string? sequenceName = null)
         where TSequenceContext : ISequenceContext => new(sequenceName);
+
+    /// <summary>The single naming convention: a node's base name with an optional disambiguating suffix.</summary>
+    internal static string ComposeName(string baseName, string? suffix) =>
+        baseName + (suffix ?? string.Empty);
 }
 
 /// <summary>
@@ -88,7 +92,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData> =>
         Register(
             sequenceFunction.Invoke,
-            sequenceFunction.GetFunctionName() + (functionName ?? string.Empty)
+            SequenceBuilder.ComposeName(sequenceFunction.GetFunctionName(), functionName)
         );
 
     internal SequenceBranchDefinition<TSequenceContext, TSequenceData> Register<TSequenceFunction>(
@@ -99,7 +103,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
         var sequenceFunction = new TSequenceFunction();
         return Register(
             sequenceFunction.Invoke,
-            sequenceFunction.GetFunctionName() + (functionName ?? string.Empty)
+            SequenceBuilder.ComposeName(sequenceFunction.GetFunctionName(), functionName)
         );
     }
 

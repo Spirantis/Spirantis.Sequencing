@@ -167,4 +167,24 @@ public class RegistrationTests
             data.ExecutionLog
         );
     }
+
+    [Fact]
+    public async Task DataLessClass_RunsAndChainsWithADataFulFunction()
+    {
+        // ContextOnlyStep is ISequenceFunction<ISequenceContext, object?> — no data. Via
+        // contravariance it satisfies the data-ful sequence's registration, so it uses the SAME
+        // Run<T>/IfTrueRun<T> overloads and a data-ful function (StepA) follows it normally.
+        var sequence = SequenceBuilder
+            .Create<DefaultSequenceContext, TestSequenceData>()
+            .Run<ContextOnlyStep>()
+            .IfTrueRun<StepA>()
+            .Build();
+
+        var data = Sequence.Data();
+        var result = await sequence.Invoke(Sequence.Context(), data);
+
+        Assert.Equal(FunctionResultType.True, result.Type);
+        // ContextOnlyStep ran (returned True, touched no data) → the data-ful StepA then ran.
+        Assert.Equal(new[] { nameof(StepA) }, data.ExecutionLog);
+    }
 }

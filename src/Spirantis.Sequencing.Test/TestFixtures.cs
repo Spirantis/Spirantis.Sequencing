@@ -409,3 +409,16 @@ internal sealed class CallApiStep : ISequenceFunction<IApiContext, TestSequenceD
         return FunctionResult.True();
     }
 }
+
+/// <summary>
+/// A data-less, context-only class: implements <c>ISequenceFunction&lt;ISequenceContext, object?&gt;</c>,
+/// so it ignores the payload and—via contravariance—runs in any sequence and chains with data-ful steps.
+/// </summary>
+internal sealed class ContextOnlyStep : ISequenceFunction<ISequenceContext, object?>
+{
+    public ValueTask<FunctionResult> Invoke(
+        ISequenceContext context,
+        object? data,
+        CancellationToken cancellationToken
+    ) => FunctionResult.True();
+}

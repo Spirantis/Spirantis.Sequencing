@@ -188,6 +188,19 @@ interface IApiContext : ISequenceContext { HttpClient Http { get; } }
 // both run in a SequenceBuilder.Create<IApiContext, T>() sequence; LogStep is reused as-is.
 ```
 
+**Data-less functions** — a function that needs no payload is just the extreme of a data slice: a
+delegate discards the data parameter (`(context, _, ct) => …`), and a class uses `object?` as its
+data type. Contravariance makes such a class run in *any* sequence and chain freely with data-ful
+functions — no separate abstraction needed:
+
+```csharp
+// Runs in any Create<TContext, TData>() sequence; the next step can still be data-ful.
+sealed class PingHealthCheck : ISequenceFunction<MyContext, object?>
+{
+    public ValueTask<FunctionResult> Invoke(MyContext ctx, object? _, CancellationToken ct) => ...;
+}
+```
+
 ## Repository layout
 
 ```

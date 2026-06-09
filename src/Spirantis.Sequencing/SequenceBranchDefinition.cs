@@ -70,7 +70,10 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(function);
 
-        return builder.Register(function, function.Method.Name + functionName);
+        return builder.Register(
+            function,
+            SequenceBuilder.ComposeName(function.Method.Name, functionName)
+        );
     }
 
     /// <summary>
@@ -93,12 +96,12 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         string? functionName = null
     )
     {
-        return sequence == null
-            ? throw new ArgumentNullException(nameof(sequence))
-            : builder.Register(
-                sequence.Invoke,
-                sequence.GetFunctionName() + (functionName ?? string.Empty)
-            );
+        ArgumentNullException.ThrowIfNull(sequence);
+
+        return builder.Register(
+            sequence.Invoke,
+            SequenceBuilder.ComposeName(sequence.GetFunctionName(), functionName)
+        );
     }
 
     #endregion
@@ -120,7 +123,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(function);
 
-        OnTrueFunctionName = function.Method.Name + (functionName ?? string.Empty);
+        OnTrueFunctionName = SequenceBuilder.ComposeName(function.Method.Name, functionName);
         builder.Register(function, OnTrueFunctionName);
         return this;
     }
@@ -137,8 +140,11 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register(sequenceFunction, functionName);
-        OnTrueFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        OnTrueFunctionName = SequenceBuilder.ComposeName(
+            sequenceFunction.GetFunctionName(),
+            functionName
+        );
+        builder.Register(sequenceFunction.Invoke, OnTrueFunctionName);
         return this;
     }
 
@@ -152,7 +158,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(sequence);
 
-        OnTrueFunctionName = sequence.GetFunctionName() + (functionName ?? string.Empty);
+        OnTrueFunctionName = SequenceBuilder.ComposeName(sequence.GetFunctionName(), functionName);
         builder.Register(sequence.Invoke, OnTrueFunctionName);
         return this;
     }
@@ -176,7 +182,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(function);
 
-        OnFalseFunctionName = function.Method.Name + (functionName ?? string.Empty);
+        OnFalseFunctionName = SequenceBuilder.ComposeName(function.Method.Name, functionName);
         builder.Register(function, OnFalseFunctionName);
         return this;
     }
@@ -193,8 +199,11 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register(sequenceFunction, functionName);
-        OnFalseFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        OnFalseFunctionName = SequenceBuilder.ComposeName(
+            sequenceFunction.GetFunctionName(),
+            functionName
+        );
+        builder.Register(sequenceFunction.Invoke, OnFalseFunctionName);
         return this;
     }
 
@@ -208,7 +217,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(sequence);
 
-        OnFalseFunctionName = sequence.GetFunctionName() + (functionName ?? string.Empty);
+        OnFalseFunctionName = SequenceBuilder.ComposeName(sequence.GetFunctionName(), functionName);
         builder.Register(sequence.Invoke, OnFalseFunctionName);
         return this;
     }
@@ -232,7 +241,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(function);
 
-        OnAbortFunctionName = function.Method.Name + (functionName ?? string.Empty);
+        OnAbortFunctionName = SequenceBuilder.ComposeName(function.Method.Name, functionName);
         builder.Register(function, OnAbortFunctionName);
         return this;
     }
@@ -249,8 +258,11 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register(sequenceFunction, functionName);
-        OnAbortFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        OnAbortFunctionName = SequenceBuilder.ComposeName(
+            sequenceFunction.GetFunctionName(),
+            functionName
+        );
+        builder.Register(sequenceFunction.Invoke, OnAbortFunctionName);
         return this;
     }
 
@@ -264,7 +276,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(sequence);
 
-        OnAbortFunctionName = sequence.GetFunctionName() + (functionName ?? string.Empty);
+        OnAbortFunctionName = SequenceBuilder.ComposeName(sequence.GetFunctionName(), functionName);
         builder.Register(sequence.Invoke, OnAbortFunctionName);
         return this;
     }
@@ -315,7 +327,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        var name = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        var name = SequenceBuilder.ComposeName(sequenceFunction.GetFunctionName(), functionName);
         OnValueFunctionNames.Add((predicate, name));
         builder.Register(sequenceFunction.Invoke, name);
         return this;
@@ -377,7 +389,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         string functionName
     )
     {
-        OnAnyFunctionName = function.Method.Name + (functionName ?? string.Empty);
+        OnAnyFunctionName = SequenceBuilder.ComposeName(function.Method.Name, functionName);
         builder.Register(function, OnAnyFunctionName);
         return this;
     }
@@ -394,8 +406,11 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register(sequenceFunction, functionName);
-        OnAnyFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        OnAnyFunctionName = SequenceBuilder.ComposeName(
+            sequenceFunction.GetFunctionName(),
+            functionName
+        );
+        builder.Register(sequenceFunction.Invoke, OnAnyFunctionName);
         return this;
     }
 
@@ -409,7 +424,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(sequence);
 
-        OnAnyFunctionName = sequence.GetFunctionName() + (functionName ?? string.Empty);
+        OnAnyFunctionName = SequenceBuilder.ComposeName(sequence.GetFunctionName(), functionName);
         builder.Register(sequence.Invoke, OnAnyFunctionName);
         return this;
     }
