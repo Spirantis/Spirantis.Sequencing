@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <!-- Ship XML docs in the package; CS1591 then flags any undocumented public API. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <RepositoryUrl>https://github.com/Spirantis/Spirantis.Sequencing</RepositoryUrl>
+    <Description>Abstractions (ISequenceFunction, FunctionResult, ISequenceContext) for Spirantis.Sequencing — a fluent engine for composing asynchronous, branching workflows.</Description>
   </PropertyGroup>
 
   <ItemGroup>

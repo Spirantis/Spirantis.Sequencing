@@ -5,6 +5,11 @@
     <Authors>Spirantis</Authors>
     <Company>Spirantis</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Spirantis/Spirantis.Sequencing</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Spirantis/Spirantis.Sequencing</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>sequencing;workflow;state-machine;pipeline;fluent;branching</PackageTags>
   </PropertyGroup>
   <PropertyGroup>
     <IncludeSymbols>true</IncludeSymbols>
@@ -12,6 +17,15 @@
     <!-- Fail the build when code is not CSharpier-formatted (CI enforcement). -->
     <CSharpier_Check>true</CSharpier_Check>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Ship the repo README as the package readme (ignored by non-packable projects). -->
+    <None
+      Include="$(MSBuildThisFileDirectory)../README.md"
+      Pack="true"
+      PackagePath="\"
+      Visible="false"
+    />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CSharpier.MsBuild" Version="1.3.0">
       <PrivateAssets>all</PrivateAssets>
