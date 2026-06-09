@@ -31,4 +31,31 @@ public class BuilderTests
         Assert.Equal(FunctionResultType.True, result.Type);
         Assert.Equal(new[] { nameof(StepA), nameof(StepB), nameof(StepC) }, data.ExecutionLog);
     }
+
+    [Fact]
+    public void Build_WithASelfCycle_Throws()
+    {
+        // StepA's True reaction points back at StepA. Before cycle detection this recursed forever
+        // (StackOverflow); now it fails fast with a clear error.
+        var builder = SequenceBuilder.Create<DefaultSequenceContext, TestSequenceData>();
+        var a = builder.Run<StepA>();
+        a.IfTrueRun<StepA>();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => builder.Build());
+        Assert.Contains($"{nameof(StepA)} -> {nameof(StepA)}", ex.Message);
+    }
+
+    [Fact]
+    public void Build_WithAMultiNodeCycle_ReportsTheFullChain()
+    {
+        // StepA -> StepB -> StepA.
+        var builder = SequenceBuilder.Create<DefaultSequenceContext, TestSequenceData>();
+        var a = builder.Run<StepA>();
+        var b = a.After<StepB>();
+        a.IfTrueRun<StepB>();
+        b.IfTrueRun<StepA>();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => builder.Build());
+        Assert.Contains($"{nameof(StepA)} -> {nameof(StepB)} -> {nameof(StepA)}", ex.Message);
+    }
 }

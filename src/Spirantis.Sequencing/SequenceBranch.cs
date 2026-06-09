@@ -2,14 +2,22 @@ using Spirantis.Sequencing.Abstraction;
 
 namespace Spirantis.Sequencing;
 
-internal class SequenceBranch<TSequenceContext, TSequenceData>(
-    Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
-    string? branchName = null
-) : ISequenceFunction<TSequenceContext, TSequenceData>
+internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
+    : ISequenceFunction<TSequenceContext, TSequenceData>
     where TSequenceContext : ISequenceContext
     where TSequenceData : ISequenceData
 {
-    private readonly string branchName = branchName ?? Guid.NewGuid().ToString();
+    private readonly Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function;
+    private readonly string branchName;
+
+    public SequenceBranch(
+        Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
+        string? branchName = null
+    )
+    {
+        this.function = function;
+        this.branchName = branchName ?? Guid.NewGuid().ToString();
+    }
 
     public SequenceBranch<TSequenceContext, TSequenceData>? OnTrueFunction { get; set; }
     public SequenceBranch<TSequenceContext, TSequenceData>? OnFalseFunction { get; set; }
@@ -27,9 +35,30 @@ internal class SequenceBranch<TSequenceContext, TSequenceData>(
         TSequenceData sequenceData
     )
     {
-        var result = await function.Invoke(sequenceContext, sequenceData);
+        // Each node has at most one continuation, so the sequence is a tail-walk: run it as a loop
+        // (O(1) stack, a single async frame) rather than recursing once per node. Completed
+        // ValueTasks are taken synchronously to avoid the await machinery on the common path.
+        var current = this;
+        while (true)
+        {
+            var pending = current.function.Invoke(sequenceContext, sequenceData);
+            var result = pending.IsCompletedSuccessfully ? pending.Result : await pending;
 
-        var continuationFunction = result.Type switch
+            var next = current.SelectContinuation(result);
+            if (next is null)
+            {
+                return result;
+            }
+
+            current = next;
+        }
+    }
+
+    private SequenceBranch<TSequenceContext, TSequenceData>? SelectContinuation(
+        FunctionResult result
+    )
+    {
+        var continuation = result.Type switch
         {
             FunctionResultType.True => OnTrueFunction,
             FunctionResultType.False => OnFalseFunction,
@@ -38,11 +67,7 @@ internal class SequenceBranch<TSequenceContext, TSequenceData>(
             _ => null,
         };
 
-        continuationFunction ??= OnAnyFunction;
-
-        return continuationFunction != null
-            ? await continuationFunction.Invoke(sequenceContext, sequenceData)
-            : result;
+        return continuation ?? OnAnyFunction;
     }
 
     private SequenceBranch<TSequenceContext, TSequenceData>? GetOnValueContinuation(object? value)
