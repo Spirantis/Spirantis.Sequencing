@@ -10,7 +10,7 @@ public class ValuePredicateTests
         // wrapping FunctionResult: matching on TestPayload.Kind must select the right branch.
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsIndeterminateAdmin>()
+            .Run<ReturnsIndeterminateAdmin>()
             .IfValueRun<StepA>(value => value is TestPayload { Kind: "admin" })
             .IfValueRun<StepB>(value => value is TestPayload { Kind: "guest" })
             .Build();
@@ -27,7 +27,7 @@ public class ValuePredicateTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsIndeterminateGuest>()
+            .Run<ReturnsIndeterminateGuest>()
             .IfValueRun<StepA>(value => value is TestPayload { Kind: "admin" })
             .IfValueRun<StepB>(value => value is TestPayload { Kind: "guest" })
             .Build();
@@ -44,7 +44,7 @@ public class ValuePredicateTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsIndeterminateGuest>()
+            .Run<ReturnsIndeterminateGuest>()
             .IfValueElseRun(Delegates.FalseDelegate)
             .Build();
 
@@ -63,7 +63,7 @@ public class ValuePredicateTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsIndeterminateGuest>()
+            .Run<ReturnsIndeterminateGuest>()
             .IfValueRun<StepA>(value => value is TestPayload { Kind: "admin" }) // never matches
             .IfAnyRun<StepB>()
             .Build();
@@ -82,7 +82,7 @@ public class ValuePredicateTests
         // consulted for Indeterminate results (documented behavior).
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrueWithValue>()
+            .Run<ReturnsTrueWithValue>()
             .IfTrueRun<StepA>()
             .IfValueRun<StepB>(_ => true)
             .Build();

@@ -124,7 +124,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register<TSequenceFunction>(functionName);
+        builder.Register(sequenceFunction, functionName);
         OnTrueFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
         return this;
     }
@@ -175,7 +175,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register<TSequenceFunction>(functionName);
+        builder.Register(sequenceFunction, functionName);
         OnFalseFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
         return this;
     }
@@ -226,7 +226,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register<TSequenceFunction>(functionName);
+        builder.Register(sequenceFunction, functionName);
         OnAbortFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
         return this;
     }
@@ -286,7 +286,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register<TSequenceFunction>(functionName);
+        builder.Register(sequenceFunction, functionName);
         OnValueFunctionNames[predicate] =
             sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
         return this;
@@ -355,7 +355,7 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register<TSequenceFunction>(functionName);
+        builder.Register(sequenceFunction, functionName);
         OnAnyFunctionName = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
         return this;
     }

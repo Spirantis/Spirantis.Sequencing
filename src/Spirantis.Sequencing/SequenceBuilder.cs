@@ -48,7 +48,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
     /// <typeparam name="TSequenceFunction">The sequence function type.</typeparam>
     /// <param name="sequenceFunction">The function instance to start the sequence with.</param>
     /// <param name="functionName">An optional suffix appended to the function name to disambiguate the node.</param>
-    public SequenceBranchDefinition<TSequenceContext, TSequenceData> StartWith<TSequenceFunction>(
+    public SequenceBranchDefinition<TSequenceContext, TSequenceData> Run<TSequenceFunction>(
         TSequenceFunction sequenceFunction,
         string? functionName = null
     )
@@ -58,7 +58,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
     /// <summary>Registers the initial function by instantiating a parameterless sequence function class.</summary>
     /// <typeparam name="TSequenceFunction">The parameterless sequence function type to instantiate.</typeparam>
     /// <param name="functionName">An optional suffix appended to the function name to disambiguate the node.</param>
-    public SequenceBranchDefinition<TSequenceContext, TSequenceData> StartWith<TSequenceFunction>(
+    public SequenceBranchDefinition<TSequenceContext, TSequenceData> Run<TSequenceFunction>(
         string? functionName = null
     )
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new() =>
@@ -66,14 +66,14 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
 
     /// <summary>Registers the initial function from a delegate, named after its method.</summary>
     /// <param name="function">The function to start the sequence with.</param>
-    public SequenceBranchDefinition<TSequenceContext, TSequenceData> StartWith(
+    public SequenceBranchDefinition<TSequenceContext, TSequenceData> Run(
         Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function
     ) => Register(function);
 
     /// <summary>Registers the initial function from a delegate under an explicit name.</summary>
     /// <param name="function">The function to start the sequence with.</param>
     /// <param name="functionName">The name to register the function under.</param>
-    public SequenceBranchDefinition<TSequenceContext, TSequenceData> StartWith(
+    public SequenceBranchDefinition<TSequenceContext, TSequenceData> Run(
         Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
         string functionName
     ) => Register(function, functionName);

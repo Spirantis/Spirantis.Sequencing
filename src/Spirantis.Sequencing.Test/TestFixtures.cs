@@ -15,6 +15,9 @@ internal sealed class TestSequenceData : ISequenceData
     public Stopwatch Stopwatch { get; set; } = Stopwatch.StartNew();
 
     public List<string> ExecutionLog { get; } = [];
+
+    /// <summary>Lets a <see cref="Gate"/> pick its True/False branch from the data.</summary>
+    public bool TakeTrue { get; set; }
 }
 
 /// <summary>A value payload used to exercise <c>IfValueRun</c> predicates.</summary>
@@ -76,6 +79,16 @@ internal sealed class ReturnsAbort : ISequenceFunction<DefaultSequenceContext, T
     {
         data.ExecutionLog.Add(nameof(ReturnsAbort));
         return FunctionResult.Abort();
+    }
+}
+
+/// <summary>Branches on <see cref="TestSequenceData.TakeTrue"/>: returns True or False accordingly.</summary>
+internal sealed class Gate : ISequenceFunction<DefaultSequenceContext, TestSequenceData>
+{
+    public ValueTask<FunctionResult> Invoke(DefaultSequenceContext context, TestSequenceData data)
+    {
+        data.ExecutionLog.Add(nameof(Gate));
+        return data.TakeTrue ? FunctionResult.True() : FunctionResult.False();
     }
 }
 

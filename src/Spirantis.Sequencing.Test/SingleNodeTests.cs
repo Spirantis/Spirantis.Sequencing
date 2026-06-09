@@ -8,7 +8,7 @@ public class SingleNodeTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .Build();
 
         var data = Sequence.Data();
@@ -23,7 +23,7 @@ public class SingleNodeTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrueWithValue>()
+            .Run<ReturnsTrueWithValue>()
             .Build();
 
         var result = await sequence.Invoke(Sequence.Context(), Sequence.Data());
@@ -41,7 +41,7 @@ public class SingleNodeTests
         // there is no OnAny, so the sequence ends and returns the start function's own result.
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .IfFalseRun<StepA>()
             .Build();
 

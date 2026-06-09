@@ -15,7 +15,7 @@ public class ContravariantDataTests
         // views they hand data down the chain through the single shared instance.
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, PipelineData>()
-            .StartWith<ParseInput>()
+            .Run<ParseInput>()
             .IfTrueRun<ComputeValue>()
             .After<ComputeValue>()
             .IfTrueRun<FormatOutput>()
@@ -37,7 +37,7 @@ public class ContravariantDataTests
         // downstream compute/format stages never run. The same built sequence is reused twice.
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, PipelineData>()
-            .StartWith<ParseInput>()
+            .Run<ParseInput>()
             .IfTrueRun<RejectNegative>()
             .After<RejectNegative>()
             .IfTrueRun<ComputeValue>()
@@ -68,7 +68,7 @@ public class ContravariantDataTests
         // function is fully independent of which sequence or data class it runs in.
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, MiniData>()
-            .StartWith<ComputeValue>()
+            .Run<ComputeValue>()
             .Build();
 
         var data = new MiniData { Parsed = 5 };

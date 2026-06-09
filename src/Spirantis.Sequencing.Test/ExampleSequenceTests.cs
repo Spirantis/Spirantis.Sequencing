@@ -8,7 +8,7 @@ public class ExampleSequenceTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>("pipeline")
-            .StartWith<StepA>()
+            .Run<StepA>()
             .IfTrueRun<StepB>()
             .After<StepB>()
             .IfTrueRun<StepC>()
@@ -32,7 +32,7 @@ public class ExampleSequenceTests
         // ReturnsTrue --True--> ReturnsFalse --False--> ReturnsAbort --Abort--> StepD
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>("decision")
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .IfTrueRun<ReturnsFalse>()
             .After<ReturnsFalse>()
             .IfFalseRun<ReturnsAbort>()
@@ -62,7 +62,7 @@ public class ExampleSequenceTests
         // ReturnsIndeterminateAdmin --(value: admin)--> StepA --True--> StepB
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>("value-tree")
-            .StartWith<ReturnsIndeterminateAdmin>()
+            .Run<ReturnsIndeterminateAdmin>()
             .IfValueRun<StepA>(value => value is TestPayload { Kind: "admin" })
             .IfValueRun<StepC>(value => value is TestPayload { Kind: "guest" })
             .After<StepA>()
@@ -87,7 +87,7 @@ public class ExampleSequenceTests
 
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>("mixed")
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .IfTrueRun(Delegates.FalseDelegate)
             .After(Delegates.FalseDelegate)
             .IfFalseRun(tail)
@@ -108,7 +108,7 @@ public class ExampleSequenceTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<AsyncReturnsTrue>()
+            .Run<AsyncReturnsTrue>()
             .IfTrueRun<StepA>()
             .Build();
 

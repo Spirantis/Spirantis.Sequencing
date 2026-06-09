@@ -8,7 +8,7 @@ public class BranchRoutingTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .IfTrueRun<ReturnsFalse>()
             .Build();
 
@@ -24,7 +24,7 @@ public class BranchRoutingTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsFalse>()
+            .Run<ReturnsFalse>()
             .IfFalseRun<StepA>()
             .Build();
 
@@ -40,7 +40,7 @@ public class BranchRoutingTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsAbort>()
+            .Run<ReturnsAbort>()
             .IfAbortRun<StepA>()
             .Build();
 
@@ -56,7 +56,7 @@ public class BranchRoutingTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsAbort>()
+            .Run<ReturnsAbort>()
             .IfTrueRun<StepA>()
             .Build();
 
@@ -72,7 +72,7 @@ public class BranchRoutingTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .IfFalseRun<StepA>() // does not match a True result
             .IfAnyRun<StepB>() // fallback
             .Build();
@@ -89,7 +89,7 @@ public class BranchRoutingTests
     {
         var sequence = SequenceBuilder
             .Create<DefaultSequenceContext, TestSequenceData>()
-            .StartWith<ReturnsTrue>()
+            .Run<ReturnsTrue>()
             .IfTrueRun<StepA>() // matches first
             .IfAnyRun<StepB>() // must be ignored
             .Build();
