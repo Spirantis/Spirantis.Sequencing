@@ -23,10 +23,10 @@ internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
     public SequenceBranch<TSequenceContext, TSequenceData>? OnFalseFunction { get; set; }
     public SequenceBranch<TSequenceContext, TSequenceData>? OnAbortFunction { get; set; }
     public SequenceBranch<TSequenceContext, TSequenceData>? OnAnyFunction { get; set; }
-    public Dictionary<
-        Func<object?, bool>,
-        SequenceBranch<TSequenceContext, TSequenceData>
-    > OnValueFunctions { get; } = [];
+    public List<(
+        Func<object?, bool> Predicate,
+        SequenceBranch<TSequenceContext, TSequenceData> Branch
+    )> OnValueFunctions { get; } = [];
 
     public string GetFunctionName() => branchName;
 
@@ -72,11 +72,11 @@ internal sealed class SequenceBranch<TSequenceContext, TSequenceData>
 
     private SequenceBranch<TSequenceContext, TSequenceData>? GetOnValueContinuation(object? value)
     {
-        foreach (var onValueContinuation in OnValueFunctions)
+        foreach (var (predicate, branch) in OnValueFunctions)
         {
-            if (onValueContinuation.Key(value))
+            if (predicate(value))
             {
-                return onValueContinuation.Value;
+                return branch;
             }
         }
 

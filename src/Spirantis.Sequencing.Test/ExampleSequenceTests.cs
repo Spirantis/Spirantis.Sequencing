@@ -118,4 +118,31 @@ public class ExampleSequenceTests
         Assert.Equal(FunctionResultType.True, result.Type);
         Assert.Equal(new[] { nameof(AsyncReturnsTrue), nameof(StepA) }, data.ExecutionLog);
     }
+
+    [Fact]
+    public async Task ConvergentBranches_ShareADownstreamNode()
+    {
+        // Both gate branches converge on StepC. Memoized build wires a single shared StepC instance;
+        // both paths must still reach it correctly.
+        var sequence = SequenceBuilder
+            .Create<DefaultSequenceContext, TestSequenceData>("convergent")
+            .Run<Gate>()
+            .IfTrueRun<StepA>()
+            .IfFalseRun<StepB>()
+            .After<StepA>()
+            .IfTrueRun<StepC>()
+            .After<StepB>()
+            .IfTrueRun<StepC>()
+            .Build();
+
+        var viaTrue = new TestSequenceData { TakeTrue = true };
+        var trueResult = await sequence.Invoke(Sequence.Context(), viaTrue);
+        Assert.Equal(FunctionResultType.True, trueResult.Type);
+        Assert.Equal(new[] { nameof(Gate), nameof(StepA), nameof(StepC) }, viaTrue.ExecutionLog);
+
+        var viaFalse = new TestSequenceData { TakeTrue = false };
+        var falseResult = await sequence.Invoke(Sequence.Context(), viaFalse);
+        Assert.Equal(FunctionResultType.True, falseResult.Type);
+        Assert.Equal(new[] { nameof(Gate), nameof(StepB), nameof(StepC) }, viaFalse.ExecutionLog);
+    }
 }

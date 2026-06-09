@@ -145,16 +145,30 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
             throw new InvalidOperationException("No initial function present");
         }
 
-        return BuildBranch(initialFunctionName, initialFunction, [], sequenceName);
+        return BuildBranch(
+            initialFunctionName,
+            initialFunction,
+            [],
+            new Dictionary<string, SequenceBranch<TSequenceContext, TSequenceData>>(),
+            sequenceName
+        );
     }
 
     private SequenceBranch<TSequenceContext, TSequenceData> BuildBranch(
         string functionName,
         Func<TSequenceContext, TSequenceData, ValueTask<FunctionResult>> function,
         List<string> path,
+        Dictionary<string, SequenceBranch<TSequenceContext, TSequenceData>> built,
         string? branchName = null
     )
     {
+        // A name already built is a completed, acyclic subtree: reuse it so shared/diamond
+        // continuations are built once instead of re-expanded per reference.
+        if (built.TryGetValue(functionName, out var cached))
+        {
+            return cached;
+        }
+
         // `path` is the current root-to-node chain. If this name is already on it, a continuation
         // points back at one of its own ancestors — a cycle the engine cannot execute. Report the
         // whole loop (e.g. "A -> B -> A") so the offending link is obvious.
@@ -176,28 +190,32 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
         {
             branch.OnTrueFunction = GetFunctionAndBuildBranch(
                 sequenceBuilderBranch.OnTrueFunctionName,
-                path
+                path,
+                built
             );
             branch.OnFalseFunction = GetFunctionAndBuildBranch(
                 sequenceBuilderBranch.OnFalseFunctionName,
-                path
+                path,
+                built
             );
             branch.OnAbortFunction = GetFunctionAndBuildBranch(
                 sequenceBuilderBranch.OnAbortFunctionName,
-                path
+                path,
+                built
             );
             branch.OnAnyFunction = GetFunctionAndBuildBranch(
                 sequenceBuilderBranch.OnAnyFunctionName,
-                path
+                path,
+                built
             );
 
-            foreach (var keyValuePair in sequenceBuilderBranch.OnValueFunctionNames)
+            foreach (var (predicate, name) in sequenceBuilderBranch.OnValueFunctionNames)
             {
-                var onValueFunction = GetFunctionAndBuildBranch(keyValuePair.Value, path);
+                var onValueFunction = GetFunctionAndBuildBranch(name, path, built);
 
                 if (onValueFunction != null)
                 {
-                    branch.OnValueFunctions.Add(keyValuePair.Key, onValueFunction);
+                    branch.OnValueFunctions.Add((predicate, onValueFunction));
                 }
             }
         }
@@ -205,12 +223,14 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
         // Pop before returning so sibling branches may legitimately reuse this name (a DAG/diamond
         // is fine; only a name appearing on its own ancestor path is a cycle).
         path.RemoveAt(path.Count - 1);
+        built[functionName] = branch;
         return branch;
     }
 
     private SequenceBranch<TSequenceContext, TSequenceData>? GetFunctionAndBuildBranch(
         string? functionName,
-        List<string> path
+        List<string> path,
+        Dictionary<string, SequenceBranch<TSequenceContext, TSequenceData>> built
     )
     {
         if (
@@ -218,7 +238,7 @@ public class SequenceBuilder<TSequenceContext, TSequenceData>
             && functions.TryGetValue(functionName, out var function)
         )
         {
-            return BuildBranch(functionName, function, path);
+            return BuildBranch(functionName, function, path, built);
         }
 
         return null;

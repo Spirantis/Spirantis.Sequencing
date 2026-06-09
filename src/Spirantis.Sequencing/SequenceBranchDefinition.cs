@@ -21,22 +21,26 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     }
 
     /// <summary>Name of the function to run when this node returns <see cref="FunctionResultType.Abort"/>.</summary>
-    public string? OnAbortFunctionName { get; private set; }
+    internal string? OnAbortFunctionName { get; private set; }
 
     /// <summary>Name of the function to run on any result type when no specific branch matched.</summary>
-    public string? OnAnyFunctionName { get; private set; }
+    internal string? OnAnyFunctionName { get; private set; }
 
     /// <summary>Name of the function to run when this node returns <see cref="FunctionResultType.False"/>.</summary>
-    public string? OnFalseFunctionName { get; private set; }
+    internal string? OnFalseFunctionName { get; private set; }
 
     /// <summary>Name of the function to run when this node returns <see cref="FunctionResultType.True"/>.</summary>
-    public string? OnTrueFunctionName { get; private set; }
+    internal string? OnTrueFunctionName { get; private set; }
 
     /// <summary>
-    /// Value predicates mapped to the function name to run when this node returns
-    /// <see cref="FunctionResultType.Indeterminate"/> and the predicate matches the produced value.
+    /// Value predicates paired, in registration order, with the function name to run when this node
+    /// returns <see cref="FunctionResultType.Indeterminate"/> and the predicate matches the value.
+    /// The first matching predicate wins, so order is significant.
     /// </summary>
-    public Dictionary<Func<object?, bool>, string> OnValueFunctionNames { get; } = [];
+    internal List<(
+        Func<object?, bool> Predicate,
+        string FunctionName
+    )> OnValueFunctionNames { get; } = [];
 
     /// <summary>Builds the executable sequence rooted at the builder's initial function.</summary>
     public ISequenceFunction<TSequenceContext, TSequenceData> Build() => builder.Build();
@@ -266,8 +270,9 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
     {
         ArgumentNullException.ThrowIfNull(function);
 
-        OnValueFunctionNames[predicate] = functionName ?? function.Method.Name;
-        builder.Register(function, OnValueFunctionNames[predicate]);
+        var name = functionName ?? function.Method.Name;
+        OnValueFunctionNames.Add((predicate, name));
+        builder.Register(function, name);
         return this;
     }
 
@@ -286,9 +291,9 @@ public class SequenceBranchDefinition<TSequenceContext, TSequenceData>
         where TSequenceFunction : ISequenceFunction<TSequenceContext, TSequenceData>, new()
     {
         var sequenceFunction = new TSequenceFunction();
-        builder.Register(sequenceFunction, functionName);
-        OnValueFunctionNames[predicate] =
-            sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        var name = sequenceFunction.GetFunctionName() + (functionName ?? string.Empty);
+        OnValueFunctionNames.Add((predicate, name));
+        builder.Register(sequenceFunction.Invoke, name);
         return this;
     }
 

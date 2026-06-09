@@ -94,4 +94,23 @@ public class ValuePredicateTests
         Assert.Equal(new[] { nameof(ReturnsTrueWithValue), nameof(StepA) }, data.ExecutionLog);
         Assert.DoesNotContain(nameof(StepB), data.ExecutionLog);
     }
+
+    [Fact]
+    public async Task ValuePredicates_FirstRegisteredMatchWins()
+    {
+        // Both predicates match the produced value; the first registered must win. Order is now
+        // deterministic (predicates are kept in an ordered list, not a delegate-keyed dictionary).
+        var sequence = SequenceBuilder
+            .Create<DefaultSequenceContext, TestSequenceData>()
+            .Run<ReturnsIndeterminateAdmin>()
+            .IfValueRun<StepA>(value => value is not null) // matches; registered first
+            .IfValueRun<StepB>(value => value is TestPayload) // also matches
+            .Build();
+
+        var data = Sequence.Data();
+        var result = await sequence.Invoke(Sequence.Context(), data);
+
+        Assert.Equal(FunctionResultType.True, result.Type);
+        Assert.Equal(new[] { nameof(ReturnsIndeterminateAdmin), nameof(StepA) }, data.ExecutionLog);
+    }
 }
