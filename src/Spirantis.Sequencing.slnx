@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Spirantis.Sequencing.Abstraction/Spirantis.Sequencing.Abstraction.csproj" />
+  <Project Path="Spirantis.Sequencing.Test/Spirantis.Sequencing.Test.csproj" />
+  <Project Path="Spirantis.Sequencing/Spirantis.Sequencing.csproj" />
+</Solution>
